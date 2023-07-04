@@ -5,9 +5,14 @@
 package it.polito.tdp.imdb;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
+
 import it.polito.tdp.imdb.model.Model;
+import it.polito.tdp.imdb.model.Movie;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -38,23 +43,64 @@ public class FXMLController {
     private TextField txtRank; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbMovie"
-    private ComboBox<?> cmbMovie; // Value injected by FXMLLoader
+    private ComboBox<Movie> cmbMovie; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
 
     @FXML
     void doCammino(ActionEvent event) {
-
+    	
+    	if (this.cmbMovie.getValue() == null) {
+    		txtResult.setText("Scegli un film!");
+    		return;
+    	}
+    	
+    	List<Movie> soluzione = model.getSequenza(this.cmbMovie.getValue());
+    	
+    	txtResult.setText("CAMMINO:\n");
+    	
+    	for (Movie m : soluzione)
+    		txtResult.appendText(m.toString() + '\n');
+    	
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	
+    	if (this.txtRank.getText() == null) {
+    		txtResult.setText("Inserisci un rank");
+    		return;
+    	}
+    	double rank;
+    	try {
+    		rank = Double.parseDouble(txtRank.getText());
+    		if (rank<0) {
+    			txtResult.setText("Inserisci un rank >= 0");
+    			return;
+    		}
+    	}
+    	catch(Exception e) {
+    		txtResult.setText("Inserisci un valore numerico");
+    		return;
+    	}
+    	
+    	SimpleWeightedGraph<Movie,DefaultWeightedEdge> graph = model.creaGrafo(rank);
+    	
+    	txtResult.setText("Grafo creato con " + graph.vertexSet().size() + " vertici e " +
+    			graph.edgeSet().size() + " archi.\n\n");
+    	
+    	cmbMovie.getItems().addAll(graph.vertexSet());
+    	
+    	this.btnCammino.setDisable(false);
+    	this.btnGrandoMax.setDisable(false);
     }
 
     @FXML
     void doGradoMax(ActionEvent event) {
+    	
+    	txtResult.setText("FILM DI GRADO MASSIMO:\n");
+    	this.txtResult.appendText(model.getMax().toString() + " (" + model.getWeight() + ")\n");
     	
     }
 
@@ -70,5 +116,8 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	this.btnCammino.setDisable(true);
+    	this.btnGrandoMax.setDisable(true);
     }
 }

@@ -1,10 +1,15 @@
 package it.polito.tdp.imdb.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Movie {
 	Integer id;
 	String name;
 	Integer year;
 	Double rank;
+	
+	Set<Integer> actors;
 	
 	public Movie(Integer id, String name, Integer year, Double rank) {
 		super();
@@ -12,6 +17,11 @@ public class Movie {
 		this.name = name;
 		this.year = year;
 		this.rank = rank;
+		actors = new HashSet<>();
+	}
+
+	public Set<Integer> getActors() {
+		return actors;
 	}
 
 	public Integer getId() {
